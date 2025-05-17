@@ -12,12 +12,16 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Demo from "./components/demo";
 
-import Analytics from "./components/admin/Analytics";
-import Contact from "./components/Contact";
 import PaymentPage from "./components/Paymentpage";
 import ContactWidget from "./components/ContactWidget";
-import AdminReviews from "./components/admin/adminreview";
-import ReviewLinkSettings from "./components/admin/reviewlink";
+import BusinessDashboard from "./components/business/dashboard/page";
+import BusinessReviews from "./components/business/reviews/page";
+import ReviewLinkPage from "./components/business/review-link/page";
+import AdminDashboard from "./components/admin/dashboard/page";
+import BusinessesPage from "./components/admin/businesses/page";
+import UsersPage from "./components/admin/users/page";
+import Sidebar from "./components/sidebar";
+
 
 // Custom hook to scroll to hash section on route change
 function useScrollToHash() {
@@ -54,9 +58,15 @@ function AppRoutes() {
         <Route path="/contact" element={<ContactWidget />} />
         <Route path="/pricing" element={<Index />} />
         <Route path="/payment" element={<PaymentPage />} />
-        <Route path="/admin" element={<AdminReviews />} />
-        <Route path="/review" element={<ReviewLinkSettings />} />
-        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/components/business/dashboard" element={<BusinessDashboard />} />
+        <Route path="/components/business/reviews" element={<BusinessReviews />} />
+        <Route path="/components/business/review-link" element={<ReviewLinkPage />} />
+        <Route path="/components/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/components/admin/businesses" element={<BusinessesPage />} />
+        <Route path="/components/admin/users" element={<UsersPage />} />
+        <Route path="/sidebar" element={<Sidebar />} />
+    
+        {/* <Route path="/admin" element={<Sidebar />} /> */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

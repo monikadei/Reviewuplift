@@ -20,7 +20,10 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    // You can change `sticky` to `fixed` if desired (see below)
+    <nav className="bg-white shadow-md sticky top-0 z-50">
+      {/* If using `fixed`, uncomment below and replace `sticky` with `fixed` */}
+      {/* <nav className="bg-white shadow-md fixed top-0 w-full z-50"> */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex-shrink-0 flex items-center">
@@ -48,14 +51,11 @@ const Navbar = () => {
                 Get Started Free
               </Button>
             </Link>
-
             <Link to="/admin">
               <Button className="bg-orange-600 hover:bg-orange-700">
                 Admin
               </Button>
             </Link>
-
-
           </div>
 
           <div className="flex md:hidden">
@@ -113,9 +113,11 @@ const Navbar = () => {
                 Login
               </Button>
             </Link>
-            <Button className="w-full bg-orange-600 hover:bg-orange-700">
-              Get Started Free
-            </Button>
+            <Link to="/payment">
+              <Button className="w-full bg-orange-600 hover:bg-orange-700">
+                Get Started Free
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

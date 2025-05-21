@@ -1,123 +1,138 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useRef } from "react"
-import { Edit, Mountain, Star, Upload } from "lucide-react"
+import React, { useState, useRef } from "react"
+import { Edit, Mountain, Star, Upload, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
 import Sidebar from "@/components/sidebar"
 import ConfirmDialog from "@/components/confirm-dialog"
 
+interface ReviewPageSettings {
+  businessName: string;
+  previewText: string;
+  previewImage: string | null;
+  reviewLinkUrl: string;
+  socialPreviewTitle: string;
+  isReviewGatingEnabled: boolean;
+  rating: number;
+  googleReviewUrl: string;
+}
+
 export default function ReviewLinkPage() {
-  // State for review link settings
-  const [reviewLinkUrl, setReviewLinkUrl] = useState("https://go.reviewhut.com/doner-hut")
-  const [isEditingUrl, setIsEditingUrl] = useState(false)
-  const [tempUrl, setTempUrl] = useState(reviewLinkUrl)
+  const [settings, setSettings] = useState<ReviewPageSettings>({
+    businessName: "DONER HUT",
+    previewText: "How was your experience with Doner Hut?",
+    previewImage: null,
+    reviewLinkUrl: "https://go.reviewhut.com/doner-hut",
+    socialPreviewTitle: "Do you want to leave us a review?",
+    isReviewGatingEnabled: true,
+    rating: 0,
+    googleReviewUrl: "https://www.google.com/search?q=doner+hut+reviews"
+  });
 
-  // State for social preview
-  const [socialPreviewTitle, setSocialPreviewTitle] = useState("Do you want to leave us a review?")
-  const [isEditingTitle, setIsEditingTitle] = useState(false)
-  const [tempTitle, setTempTitle] = useState(socialPreviewTitle)
+  const [isEditingUrl, setIsEditingUrl] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingPreview, setIsEditingPreview] = useState(false);
+  const [showGatingConfirm, setShowGatingConfirm] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  
+  const [tempSettings, setTempSettings] = useState<ReviewPageSettings>({...settings});
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // State for review gating
-  const [isReviewGatingEnabled, setIsReviewGatingEnabled] = useState(true)
-  const [showGatingConfirm, setShowGatingConfirm] = useState(false)
-
-  // State for desktop preview customization
-  const [businessName, setBusinessName] = useState("DONER HUT")
-  const [previewText, setPreviewText] = useState("How was your experience with Doner Hut?")
-  const [isEditingPreview, setIsEditingPreview] = useState(false)
-  const [tempBusinessName, setTempBusinessName] = useState(businessName)
-  const [tempPreviewText, setTempPreviewText] = useState(previewText)
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
-  const [rating, setRating] = useState(0)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Handle URL edit
   const handleUrlEdit = () => {
     if (isEditingUrl) {
-      setReviewLinkUrl(tempUrl)
+      setSettings({...settings, reviewLinkUrl: tempSettings.reviewLinkUrl});
     }
-    setIsEditingUrl(!isEditingUrl)
+    setIsEditingUrl(!isEditingUrl);
   }
 
-  // Handle title edit
   const handleTitleEdit = () => {
     if (isEditingTitle) {
-      setSocialPreviewTitle(tempTitle)
+      setSettings({...settings, socialPreviewTitle: tempSettings.socialPreviewTitle});
     }
-    setIsEditingTitle(!isEditingTitle)
+    setIsEditingTitle(!isEditingTitle);
   }
 
-  // Handle preview edit
   const handlePreviewEdit = () => {
     if (isEditingPreview) {
-      setBusinessName(tempBusinessName)
-      setPreviewText(tempPreviewText)
+      setSettings({
+        ...settings,
+        businessName: tempSettings.businessName,
+        previewText: tempSettings.previewText,
+        previewImage: tempSettings.previewImage,
+        googleReviewUrl: tempSettings.googleReviewUrl
+      });
+    } else {
+      setTempSettings({...settings});
     }
-    setIsEditingPreview(!isEditingPreview)
+    setIsEditingPreview(!isEditingPreview);
   }
 
-  // Generate a new review link (simulated)
   const generateNewLink = () => {
-    const randomString = Math.random().toString(36).substring(2, 8)
-    const newLink = `https://go.reviewhut.com/${randomString}`
-    setReviewLinkUrl(newLink)
-    setTempUrl(newLink)
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const newLink = `https://go.reviewhut.com/${randomString}`;
+    setSettings({...settings, reviewLinkUrl: newLink});
+    setTempSettings({...tempSettings, reviewLinkUrl: newLink});
   }
 
-  // Handle image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          setPreviewImage(event.target.result as string)
+          setTempSettings({...tempSettings, previewImage: event.target.result as string});
         }
       }
-      reader.readAsDataURL(file)
+      reader.readAsDataURL(file);
     }
   }
 
-  // Trigger file input click
   const triggerFileInput = () => {
-    fileInputRef.current?.click()
+    fileInputRef.current?.click();
   }
 
-  // Handle review submission based on rating
+  const handleRatingChange = (rating: number) => {
+    setSettings({...settings, rating});
+    setSubmitted(false);
+  }
+
+  const handleSubmitFeedback = () => {
+    console.log("Feedback submitted:", feedback);
+    setSubmitted(true);
+  };
+
   const handleLeaveReview = () => {
-    if (isReviewGatingEnabled) {
-      if (rating > 3) {
-        // Redirect to review link for positive reviews
-        window.open(reviewLinkUrl, "_blank")
+    if (settings.isReviewGatingEnabled) {
+      if (settings.rating > 3) {
+        window.open(settings.googleReviewUrl, "_blank");
       } else {
-        // Redirect to home page for negative reviews
-        window.location.href = "/"
+        // For negative reviews, show feedback form
+        if (submitted) {
+          window.location.href = "/";
+        }
       }
     } else {
-      // If review gating is disabled, always go to review link
-      window.open(reviewLinkUrl, "_blank")
+      window.open(settings.googleReviewUrl, "_blank");
     }
   }
 
-  // Toggle review gating with confirmation
   const handleToggleReviewGating = () => {
-    if (isReviewGatingEnabled) {
-      setShowGatingConfirm(true)
+    if (settings.isReviewGatingEnabled) {
+      setShowGatingConfirm(true);
     } else {
-      setIsReviewGatingEnabled(true)
+      setSettings({...settings, isReviewGatingEnabled: true});
     }
   }
 
-  // Confirm disabling review gating
   const confirmDisableGating = () => {
-    setIsReviewGatingEnabled(false)
-    setShowGatingConfirm(false)
+    setSettings({...settings, isReviewGatingEnabled: false});
+    setShowGatingConfirm(false);
   }
 
   return (
@@ -128,8 +143,7 @@ export default function ReviewLinkPage() {
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">Review Link</h1>
           <p className="text-muted-foreground mb-8">
-            Customize the behavior, text, and images of your Review Link. If only one integration is active, customers
-            will be sent directly to the review site, skipping the "Positive Experience" page.
+            Customize the behavior, text, and images of your Review Link. Changes made here will appear on your public review page.
           </p>
 
           <div className="grid lg:grid-cols-3 gap-8">
@@ -155,8 +169,8 @@ export default function ReviewLinkPage() {
                   {isEditingUrl ? (
                     <div className="space-y-4">
                       <Input
-                        value={tempUrl}
-                        onChange={(e) => setTempUrl(e.target.value)}
+                        value={tempSettings.reviewLinkUrl}
+                        onChange={(e) => setTempSettings({...tempSettings, reviewLinkUrl: e.target.value})}
                         aria-label="Review link URL"
                       />
                       <Button
@@ -171,11 +185,11 @@ export default function ReviewLinkPage() {
                   ) : (
                     <div className="flex items-center justify-between bg-muted p-3 rounded">
                       <div className="flex items-center">
-                        <span className="text-sm font-medium">{reviewLinkUrl}</span>
+                        <span className="text-sm font-medium">{settings.reviewLinkUrl}</span>
                       </div>
                       <Button variant="outline" size="sm" asChild>
                         <a
-                          href={reviewLinkUrl}
+                          href={settings.reviewLinkUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label="Test review link in new window"
@@ -208,13 +222,13 @@ export default function ReviewLinkPage() {
                 <CardContent>
                   {isEditingTitle ? (
                     <Input
-                      value={tempTitle}
-                      onChange={(e) => setTempTitle(e.target.value)}
+                      value={tempSettings.socialPreviewTitle}
+                      onChange={(e) => setTempSettings({...tempSettings, socialPreviewTitle: e.target.value})}
                       aria-label="Social preview title"
                     />
                   ) : (
                     <div className="bg-muted p-3 rounded">
-                      <p className="text-sm font-medium">{socialPreviewTitle}</p>
+                      <p className="text-sm font-medium">{settings.socialPreviewTitle}</p>
                     </div>
                   )}
                 </CardContent>
@@ -232,8 +246,8 @@ export default function ReviewLinkPage() {
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label htmlFor="review-gating">{isReviewGatingEnabled ? "Enabled" : "Disabled"}</Label>
-                      {isReviewGatingEnabled && (
+                      <Label htmlFor="review-gating">{settings.isReviewGatingEnabled ? "Enabled" : "Disabled"}</Label>
+                      {settings.isReviewGatingEnabled && (
                         <p className="text-sm text-muted-foreground">
                           Negative reviews will be sent to your feedback form instead
                         </p>
@@ -241,7 +255,7 @@ export default function ReviewLinkPage() {
                     </div>
                     <Switch
                       id="review-gating"
-                      checked={isReviewGatingEnabled}
+                      checked={settings.isReviewGatingEnabled}
                       onCheckedChange={handleToggleReviewGating}
                       aria-label="Toggle review gating"
                     />
@@ -266,38 +280,106 @@ export default function ReviewLinkPage() {
                 </CardHeader>
                 <CardContent>
                   {isEditingPreview ? (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="business-name">Business Name</Label>
-                        <Input
-                          id="business-name"
-                          value={tempBusinessName}
-                          onChange={(e) => setTempBusinessName(e.target.value)}
-                          aria-label="Business name"
-                        />
+                    <div className="space-y-6">
+                      <div className="border rounded-lg p-6 bg-white">
+                        <div className="flex justify-between items-center mb-4">
+                          <h2 className="text-lg font-semibold">Webpage Design</h2>
+                          <Button variant="ghost" size="sm" onClick={() => setIsEditingPreview(false)}>
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="business-name">Business Name</Label>
+                            <Input
+                              id="business-name"
+                              value={tempSettings.businessName}
+                              onChange={(e) => setTempSettings({...tempSettings, businessName: e.target.value})}
+                              aria-label="Business name"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="preview-text">Welcome Message</Label>
+                            <Input
+                              id="preview-text"
+                              value={tempSettings.previewText}
+                              onChange={(e) => setTempSettings({...tempSettings, previewText: e.target.value})}
+                              aria-label="Preview text"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>Business Logo/Image</Label>
+                            <div className="flex items-center gap-4">
+                              {tempSettings.previewImage ? (
+                                <div className="relative">
+                                  <img
+                                    src={tempSettings.previewImage}
+                                    alt="Business Preview"
+                                    className="w-20 h-20 object-cover rounded"
+                                  />
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-white border"
+                                    onClick={() => setTempSettings({...tempSettings, previewImage: null})}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="w-20 h-20 bg-gray-100 rounded flex items-center justify-center">
+                                  <Mountain className="h-8 w-8 text-gray-400" />
+                                </div>
+                              )}
+                              <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleImageUpload}
+                                accept="image/*"
+                                className="hidden"
+                                aria-label="Upload business image"
+                              />
+                              <Button variant="outline" onClick={triggerFileInput}>
+                                <Upload className="h-4 w-4 mr-2" />
+                                {tempSettings.previewImage ? "Change Image" : "Upload Image"}
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="google-url">Google Review URL</Label>
+                            <Input
+                              id="google-url"
+                              value={tempSettings.googleReviewUrl}
+                              onChange={(e) => setTempSettings({...tempSettings, googleReviewUrl: e.target.value})}
+                              aria-label="Google review URL"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>Color Theme</Label>
+                            <div className="flex gap-2">
+                              {['primary', 'blue', 'green', 'red', 'purple', 'orange'].map((color) => (
+                                <button
+                                  key={color}
+                                  className={`w-8 h-8 rounded-full bg-${color}-500 border-2 border-transparent hover:border-gray-300`}
+                                  aria-label={`Select ${color} theme`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="preview-text">Preview Text</Label>
-                        <Input
-                          id="preview-text"
-                          value={tempPreviewText}
-                          onChange={(e) => setTempPreviewText(e.target.value)}
-                          aria-label="Preview text"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="business-image">Business Image</Label>
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          onChange={handleImageUpload}
-                          accept="image/*"
-                          className="hidden"
-                          aria-label="Upload business image"
-                        />
-                        <Button variant="outline" onClick={triggerFileInput} aria-label="Upload business image">
-                          <Upload className="h-4 w-4 mr-2" aria-hidden="true" />
-                          Upload Image
+                      
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setIsEditingPreview(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handlePreviewEdit}>
+                          Save Changes
                         </Button>
                       </div>
                     </div>
@@ -317,16 +399,16 @@ export default function ReviewLinkPage() {
               <div className="sticky top-8">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Preview</CardTitle>
+                    <CardTitle>Live Preview</CardTitle>
                     <CardDescription>How customers will see your review page</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="bg-white p-6 border rounded-lg min-h-[500px] flex flex-col">
                       <div className="flex-grow">
-                        {previewImage ? (
+                        {settings.previewImage ? (
                           <div className="mb-4">
                             <img
-                              src={previewImage || "/placeholder.svg"}
+                              src={settings.previewImage}
                               alt="Business Preview"
                               className="w-full h-auto max-h-40 object-contain rounded mx-auto"
                             />
@@ -336,8 +418,8 @@ export default function ReviewLinkPage() {
                             <Mountain className="h-8 w-8 text-orange" aria-hidden="true" />
                           </div>
                         )}
-                        <h3 className="font-bold text-xl mb-3 text-center">{businessName}</h3>
-                        <p className="text-muted-foreground mb-6 text-center">{previewText}</p>
+                        <h3 className="font-bold text-xl mb-3 text-center">{settings.businessName}</h3>
+                        <p className="text-muted-foreground mb-6 text-center">{settings.previewText}</p>
 
                         {/* Star Rating Display */}
                         <div className="mb-6 text-center">
@@ -347,11 +429,11 @@ export default function ReviewLinkPage() {
                                 key={star}
                                 type="button"
                                 className="focus:outline-none"
-                                onClick={() => setRating(star)}
+                                onClick={() => handleRatingChange(star)}
                                 aria-label={`${star} star${star !== 1 ? "s" : ""}`}
-                                aria-pressed={star <= rating}
+                                aria-pressed={star <= settings.rating}
                               >
-                                {star <= rating ? (
+                                {star <= settings.rating ? (
                                   <Star className="h-8 w-8 fill-yellow-400 text-yellow-400" aria-hidden="true" />
                                 ) : (
                                   <Star className="h-8 w-8 text-gray-300" aria-hidden="true" />
@@ -360,17 +442,59 @@ export default function ReviewLinkPage() {
                             ))}
                           </div>
                           <p className="text-sm text-muted-foreground mt-2">
-                            {rating > 0
-                              ? `You selected ${rating} star${rating !== 1 ? "s" : ""}`
+                            {settings.rating > 0
+                              ? `You selected ${settings.rating} star${settings.rating !== 1 ? "s" : ""}`
                               : "Rate your experience"}
                           </p>
                         </div>
+
+                        {/* Review Gating Logic */}
+                        {settings.rating > 0 && settings.isReviewGatingEnabled && settings.rating <= 3 && !submitted && (
+                          <div className="space-y-4">
+                            <p className="text-red-600 font-medium">
+                              We're sorry to hear that. Please let us know what went wrong:
+                            </p>
+                            <Textarea
+                              placeholder="Share your feedback..."
+                              value={feedback}
+                              onChange={(e) => setFeedback(e.target.value)}
+                            />
+                            <Button onClick={handleSubmitFeedback} disabled={!feedback}>
+                              Submit Feedback
+                            </Button>
+                          </div>
+                        )}
+
+                        {settings.rating > 0 && (
+                          (!settings.isReviewGatingEnabled || settings.rating > 3 || submitted) && (
+                            <div className="text-center">
+                              {settings.rating > 3 && (
+                                <p className="text-green-600 font-medium mb-2">
+                                  We're glad you enjoyed it! Please leave us a public review:
+                                </p>
+                              )}
+                              {submitted && (
+                                <p className="text-green-600 font-medium mb-2">
+                                  Thank you for your feedback!
+                                </p>
+                              )}
+                              <Button 
+                                onClick={handleLeaveReview} 
+                                disabled={settings.rating === 0 || 
+                                  (settings.isReviewGatingEnabled && 
+                                   settings.rating <= 3 && 
+                                   !submitted)}
+                              >
+                                {settings.rating > 3 || !settings.isReviewGatingEnabled 
+                                  ? "Leave Review" 
+                                  : "Continue"}
+                              </Button>
+                            </div>
+                          )
+                        )}
                       </div>
 
                       <div className="text-center">
-                        <Button onClick={handleLeaveReview} disabled={rating === 0} aria-label="Leave review">
-                          Leave Review
-                        </Button>
                         <p className="text-xs text-muted-foreground mt-3">Powered by ReviewHUT</p>
                       </div>
                     </div>
@@ -394,5 +518,5 @@ export default function ReviewLinkPage() {
         variant="destructive"
       />
     </div>
-  )
+  );
 }

@@ -163,32 +163,20 @@ export default function BusinessesPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onSelect={() => (window.location.href = `/admin/businesses/${business.id}`)}
-                            >
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onSelect={() => (window.location.href = `/admin/businesses/${business.id}/edit`)}
-                            >
-                              Edit Business
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onSelect={() => (window.location.href = `/admin/businesses/${business.id}/users`)}
-                            >
-                              Manage Users
-                            </DropdownMenuItem>
-                            {business.status === "pending" && (
-                              <DropdownMenuItem onSelect={() => setBusinessToActivate(business)}>
-                                Approve & Activate
-                              </DropdownMenuItem>
-                            )}
                             {business.status === "active" && (
                               <DropdownMenuItem
                                 onSelect={() => setBusinessToDeactivate(business)}
                                 className="text-amber-600"
                               >
                                 Deactivate
+                              </DropdownMenuItem>
+                            )}
+                            {(business.status === "inactive" || business.status === "pending") && (
+                              <DropdownMenuItem
+                                onSelect={() => setBusinessToActivate(business)}
+                                className="text-green-600"
+                              >
+                                {business.status === "pending" ? "Approve & Activate" : "Activate"}
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuItem onSelect={() => setBusinessToDelete(business)} className="text-red-600">
@@ -230,9 +218,13 @@ export default function BusinessesPage() {
         isOpen={!!businessToActivate}
         onClose={() => setBusinessToActivate(null)}
         onConfirm={handleActivateBusiness}
-        title="Activate Business"
-        description={`Are you sure you want to activate ${businessToActivate?.name}?`}
-        confirmText="Activate"
+        title={businessToActivate?.status === "pending" ? "Approve Business" : "Activate Business"}
+        description={
+          businessToActivate?.status === "pending"
+            ? `Are you sure you want to approve and activate ${businessToActivate?.name}?`
+            : `Are you sure you want to activate ${businessToActivate?.name}?`
+        }
+        confirmText={businessToActivate?.status === "pending" ? "Approve" : "Activate"}
         cancelText="Cancel"
       />
 

@@ -21,6 +21,7 @@ import AdminDashboard from "./components/admin/dashboard/page";
 import BusinessesPage from "./components/admin/businesses/page";
 import UsersPage from "./components/admin/users/page";
 import Sidebar from "./components/sidebar";
+import BusinessForm from "./components/Business-form";
 
 
 // Custom hook to scroll to hash section on route change
@@ -58,6 +59,7 @@ function AppRoutes() {
         <Route path="/contact" element={<ContactWidget />} />
         <Route path="/pricing" element={<Index />} />
         <Route path="/payment" element={<PaymentPage />} />
+        <Route path="/admin" element={<BusinessForm />} />
         <Route path="/components/business/dashboard" element={<BusinessDashboard />} />
         <Route path="/components/business/reviews" element={<BusinessReviews />} />
         <Route path="/components/business/review-link" element={<ReviewLinkPage />} />

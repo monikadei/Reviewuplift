@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Building, Mail, MapPin, Phone, Star, User, Users } from "lucide-react"
+// If you want to use useNavigate (from react-router-dom), import it like this:
+// import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -10,6 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import Sidebar from "@/components/sidebar"
 import { businessesData, usersData, reviewsData } from "@/lib/data"
 import type { Business, User as UserType, Review } from "@/lib/types"
+import { useNavigate } from "react-router-dom"
 
 export default function BusinessDetailsPage({ params }: { params: { id: string } }) {
   const router = useRouter()
